@@ -18,7 +18,19 @@ class CombatAudio {
   }
   shot(type){if(this.muted||!this.context)return;let s=this.context.createBufferSource();s.buffer=this.samples[type][this.variant++%3];s.playbackRate.value=.97+Math.random()*.06;s.connect(this.limiter);s.connect(this.room);s.start();}
   impact(){if(this.muted||!this.context)return;const c=this.context,b=c.createBuffer(1,Math.floor(c.sampleRate*.09),c.sampleRate),data=b.getChannelData(0);let low=0;for(let i=0;i<data.length;i++){low=low*.72+(Math.random()*2-1)*.28;data[i]=low*Math.exp(-i/c.sampleRate*45)*.5}let source=c.createBufferSource();source.buffer=b;source.connect(this.limiter);source.start();}
-  say(index){if(this.muted||!this.context)return;this.stopVoice();if(this.voices[index]){let source=this.context.createBufferSource(),gain=this.context.createGain();source.buffer=this.voices[index];gain.gain.value=.95;source.connect(gain);gain.connect(this.limiter);this.voice=source;source.onended=()=>{if(this.voice===source)this.voice=null};source.start(this.context.currentTime+.12)}}
-  stopVoice(){if(this.voice){try{this.voice.stop()}catch{}this.voice=null}}
+  englishVoice(){
+    const voices=window.speechSynthesis?.getVoices()??[];
+    return voices.filter(v=>/^en([-_]|$)/i.test(v.lang)&&/Google|Microsoft|Natural|Siri|Alex|Daniel|David|Guy|Ryan|Arthur/i.test(v.name)).sort((a,b)=>{const score=v=>(/Natural|Neural/i.test(v.name)?8:0)+(/David|Guy|Ryan|Daniel|Alex|Arthur/i.test(v.name)?4:0)+(v.lang==='en-US'?2:0);return score(b)-score(a)})[0];
+  }
+  say(index,text){if(this.muted||!this.context)return;this.stopVoice();const voice=this.englishVoice();
+    if(voice&&text&&typeof SpeechSynthesisUtterance!=='undefined'){
+      const line=new SpeechSynthesisUtterance(text);line.voice=voice;line.lang=voice.lang;line.rate=.95;line.pitch=.85;line.volume=.85;this.voice=line;
+      line.onend=()=>{if(this.voice===line)this.voice=null};
+      line.onerror=()=>{if(this.voice===line){this.voice=null;this.playClip(index)}};
+      try{window.speechSynthesis.speak(line)}catch{this.voice=null;this.playClip(index)}
+    }else this.playClip(index);
+  }
+  playClip(index){if(this.muted||!this.context||!this.voices[index])return;let source=this.context.createBufferSource(),gain=this.context.createGain();source.buffer=this.voices[index];gain.gain.value=.95;source.connect(gain);gain.connect(this.limiter);this.voice=source;source.onended=()=>{if(this.voice===source)this.voice=null};source.start(this.context.currentTime+.12)}
+  stopVoice(){const voice=this.voice;this.voice=null;if(voice){if(typeof voice.stop==='function'){try{voice.stop()}catch{}}else window.speechSynthesis?.cancel()}}
   setMuted(muted){this.muted=muted;if(this.master)this.master.gain.setTargetAtTime(muted?0:.8,this.context.currentTime,.015);if(muted)this.stopVoice()}
 }

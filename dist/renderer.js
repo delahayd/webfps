@@ -3,7 +3,7 @@
 class HellRenderer {
   constructor(canvas,level){
     this.canvas=canvas;this.gl=canvas.getContext('webgl',{alpha:false,antialias:true});
-    if(!this.gl)throw new Error('WebGL est nécessaire pour cette version.');
+    if(!this.gl)throw new Error('This version requires WebGL.');
     this.level=level;this.textures={};this.weapons=[];this.ready=false;
     const gl=this.gl,compile=(type,source)=>{let s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s};
     const vs=`attribute vec3 position;attribute vec2 uv;attribute vec3 color;uniform vec3 camera;uniform float yaw;uniform float pitch;uniform float aspect;varying vec2 texcoord;varying vec3 tint;varying vec3 world;varying float depth;
@@ -29,7 +29,7 @@ class HellRenderer {
   }
   quad(out,points,tint=[1,1,1],repeat=1){const uv=[[0,0],[1,0],[1,repeat],[0,repeat]];for(let i of [0,1,2,0,2,3])out.push(...points[i],...uv[i],...tint)}
   texture(source,repeat=false){const gl=this.gl,t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,repeat?gl.REPEAT:gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,repeat?gl.REPEAT:gl.CLAMP_TO_EDGE);return t}
-  async load(sprites){const load=url=>new Promise((resolve,reject)=>{let img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Impossible de charger '+url));img.src=url});let [atlas,stone]=await Promise.all([load('assets/infernal-atlas.png'),load('assets/basalt.png')]);
+  async load(sprites){const load=url=>new Promise((resolve,reject)=>{let img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Unable to load '+url));img.src=url});let [atlas,stone]=await Promise.all([load('assets/infernal-atlas.png'),load('assets/basalt.png')]);
     let surface=document.createElement('canvas');surface.width=surface.height=1024;surface.getContext('2d').drawImage(stone,0,0,1024,1024);this.stone=this.texture(surface,true);
     for(let i=0;i<6;i++){let c=document.createElement('canvas');c.width=512;c.height=512;let g=c.getContext('2d');const split=atlas.height*.543;g.drawImage(atlas,(i%3)*atlas.width/3,i<3?0:split,atlas.width/3,i<3?split:atlas.height-split,0,0,512,512);if(i<3)this.textures[i]=this.texture(c);else if(i<5)this.weapons.push(c);else this.textures.fire=this.texture(c)}
     for(let kind of ['blood','bloodstain']){let c=document.createElement('canvas');c.width=c.height=64;let g=c.getContext('2d');g.fillStyle=kind==='blood'?'#a6160e':'#610b08';g.beginPath();for(let i=0;i<24;i++){let a=i*Math.PI/12,r=kind==='blood'?12+Math.random()*15:14+Math.random()*16;let x=32+Math.cos(a)*r,y=32+Math.sin(a)*r;i?g.lineTo(x,y):g.moveTo(x,y)}g.closePath();g.fill();g.fillStyle='#da302333';g.beginPath();g.ellipse(27,26,8,6,0,0,7);g.fill();this.textures[kind]=this.texture(c)}

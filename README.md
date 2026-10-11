@@ -1,26 +1,23 @@
-# La Dernière Porte — version 3
-FPS infernal en français, avec décor 3D WebGL, textures de basalte détaillées et sprites réalistes sur fond transparent. Lancez `python3 -m http.server 8080 --directory dist` puis ouvrez http://localhost:8080 dans un navigateur de bureau compatible WebGL.
+# The Last Gate
+An English-language infernal browser FPS. Run `python3 -m http.server 8080 --directory dist`, then open http://localhost:8080 in a desktop browser with WebGL.
 
-## Commandes
-- Souris : vue horizontale à 360°, regard vertical (limité près des pôles pour éviter le retournement).
-- Clic gauche : tirer ; maintenir pour enchaîner les tirs selon la cadence de l’arme.
-- Clic droit maintenu : avancer dans la direction horizontale du regard.
-- ZQSD/WASD : déplacements complémentaires ; Maj : courir.
-- Flèches : tourner et regarder verticalement si la capture souris n’est pas disponible.
-- 1/2 : revolver / fusil à pompe ; E : briser un sceau ; M : carte ; Échap : pause.
+## Controls
+- Mouse: horizontal 360° free look and vertical aiming.
+- Left click: fire; hold to fire at the weapon's normal rate.
+- Hold right click: move forward in the horizontal direction of your view.
+- WASD / ZQSD: movement; Shift: sprint.
+- Arrow keys: look around when mouse capture is unavailable.
+- 1 / 2: revolver / shotgun; E: break a seal; M: map; Escape: pause.
 
-Brisez les trois sceaux puis atteignez le portail au nord. Cache secrète dans le renfoncement ouest. Les tirs prennent en compte la visée verticale.
+Break three seals and reach the northern gate. A secret stash is hidden in the western alcove.
 
-## Visuels et vérification
-Les matériaux et l’atlas (trois démons, deux armes et une boule de feu) sont générés avec imagegen et servis depuis `dist/assets`. Le renderer découpe l’atlas au chargement en textures WebGL et images d’armes ; aucun service externe requis pour jouer. Polices Google facultatives.
+## Graphics and combat
+WebGL world geometry, locally served basalt textures and transparent demon/weapon sprites. Assets generated with imagegen. Optional Google fonts; no external service needed to play.
 
-Vérification dans Chrome sans interface avec WebGL : chargement des assets, absence d’erreurs JavaScript/WebGL, clic droit déplacement/arrêt, clic gauche tir, suppression du menu contextuel, rotation 360° et regard vertical, visée verticale, progression des sceaux, victoire, relâchement des boutons à la pause. Capture du rendu inspectée.
+Weapon sounds combine a sharp report, a low-frequency blast, mechanical sounds and room reflections. Blood particles have gravity and leave temporary floor stains. Particle and stain counts are capped.
 
-Version ordinateur ; commandes tactiles non incluses. Ennemis détaillés en sprites orientés vers la caméra, décor entièrement en 3D.
+## English voices
+Four voiced kill lines: “Back to hell”, “One less demon”, “Your ticket to hell”, “Not today, demon”. Voice lines have matching English subtitles and a 4.5-second cooldown. A suitable English system/browser voice is used when available; local English WAV clips provide a fallback when no suitable voice exists or speech synthesis fails. The fallback clips use an American male synthetic voice with lighter filtering than the earlier French clips. Voice quality depends on the voices installed in the browser or operating system. SOUND mutes both effects and speech; pausing interrupts speech.
 
-## Combat : son et impacts
-Les tirs Web Audio superposent un claquement bref, un souffle grave, des bruits mécaniques et des réflexions de la salle, avec trois variations par arme et un compresseur pour les tirs simultanés. Les sons sont synthétisés localement.
-
-Les impacts créent des particules de sang en 3D avec gravité et traces au sol qui disparaissent après 22 à 28 secondes ; le nombre de particules et de traces est limité. Une élimination déclenche une des quatre répliques françaises, avec sous-titres et un délai minimum de 4,5 secondes entre les phrases. Les clips WAV sont des voix synthétiques filtrées façon radio et restent disponibles sans service vocal externe. Le bouton SON coupe aussi les voix ; la pause les interrompt.
-
-Vérification Chrome supplémentaire : décodage des quatre clips, rendu audio hors ligne non silencieux et sans saturation, sang sur impact et élimination, évolution et disparition des traces, cadence des répliques, mute et rendu WebGL des effets.
+## Verification
+Chrome: controls, 360° and vertical aiming, seals/victory, blood impacts and expiry, English text, four decoded voice clips, rendered audio, mute/pause, WebGL errors. Desktop controls only. Enemies are camera-facing detailed sprites; the environment is 3D.
