@@ -16,8 +16,14 @@ WebGL world geometry, locally served basalt textures and transparent demon/weapo
 
 Weapon sounds combine a sharp report, a low-frequency blast, mechanical sounds and room reflections. Blood particles have gravity and leave temporary floor stains. Particle and stain counts are capped.
 
-## English voices
-Four voiced kill lines: “Back to hell”, “One less demon”, “Your ticket to hell”, “Not today, demon”. Voice lines have matching English subtitles and a 4.5-second cooldown. A suitable English system/browser voice is used when available; local English WAV clips provide a fallback when no suitable voice exists or speech synthesis fails. The fallback clips use an American male synthetic voice with lighter filtering than the earlier French clips. Voice quality depends on the voices installed in the browser or operating system. SOUND mutes both effects and speech; pausing interrupts speech.
+## Voices and music
+Four English kill lines use locally generated Kokoro neural voice clips (`am_fenrir`, speed 0.94), with natural intonation and no radio filter. Browser speech synthesis has been removed, so playback is consistent across devices. The four lines retain their English subtitles and 4.5-second cooldown.
+
+An original 64-second stereo dark ambient score combines low drones, slow heartbeat-like percussion, dissonant swells and distant metallic notes. The loop fades in while playing, fades out on pause/death/victory, and ducks automatically during spoken lines. MUSIC and VOICE can be toggled independently; SOUND mutes all audio.
+
+The music and clips are served from `dist/assets`; no speech service or neural model is loaded by the browser. Regeneration scripts are in `scripts/` and require an external temporary Python environment. The 300 MB voice model is deliberately excluded from the site.
+
+Voice model: [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), Apache-2.0; generator: [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx), MIT. Music is an original procedural composition for this project.
 
 ## Verification
-Chrome: controls, 360° and vertical aiming, seals/victory, blood impacts and expiry, English text, four decoded voice clips, rendered audio, mute/pause, WebGL errors. Desktop controls only. Enemies are camera-facing detailed sprites; the environment is 3D.
+Chrome: controls, 360° and vertical aiming, seals/victory, blood impacts and expiry, English text, four decoded neural voice clips, 64-second decoded music loop, music ducking and restoration, independent voice/music switches, rendered mixed audio, mute/pause and WebGL errors. Desktop controls only. Enemies are camera-facing detailed sprites; the environment is 3D.
