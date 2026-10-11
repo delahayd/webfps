@@ -8,3 +8,5 @@
 .audio-controls{display:flex;gap:8px}header .audio-controls button{font-size:12px;padding:8px 10px;white-space:nowrap}@media(max-width:1000px){header>span{display:none}}@media(max-width:600px){header{padding:10px;height:auto;gap:10px;flex-wrap:wrap}header a{font-size:20px}.audio-controls{gap:5px}header .audio-controls button{padding:7px 8px;font-size:11px}}
 
 #interact{position:absolute;top:58%;left:0;width:100%;text-align:center;color:#edd6b4;font:12px 'Space Mono',monospace;text-shadow:0 2px 4px #000;pointer-events:none}
+
+.note a{color:#aa947b;margin-left:12px}.hud #weapon{font-size:clamp(20px,2.6vw,32px)}
