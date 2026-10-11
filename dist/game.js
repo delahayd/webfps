@@ -51,9 +51,9 @@ ctx.clearRect(0,0,W,H);if(!renderer?.ready)return;
 let objects=[...enemies.filter(e=>e.hp>0).map(e=>({...e,kind:e.type,height:e.type===2?2.2:1.65})),...items.filter(i=>!i.used).map(i=>({...i,kind:i.type,height:.45})),...seals.filter(s=>s.on).map(s=>({...s,kind:'seal'})),...shots.map(s=>({...s,kind:'fire'})),{...exit,kind:'portal',height:2.5,active:finalWave}];
 renderer.draw(p,objects,time);
 let moving=mode==='playing'&&(mouse.right||keys.w||keys.z||keys.s||keys.a||keys.q||keys.d),bob=moving?Math.sin(time*10)*5:0,recoil=flash/.14;
-let size=weapon?390:330,cx=W*.5+35,top=H-size+bob+recoil*26;
+let size=weapon?390:330,cx=W*.5+35,top=H*.54+bob+recoil*26;
 ctx.imageSmoothingEnabled=true;ctx.drawImage(renderer.weapons[weapon],cx-size/2,top,size,size);
-if(flash>0){let mx=cx,my=top+size*.25;ctx.save();ctx.globalCompositeOperation='screen';let fire=ctx.createRadialGradient(mx,my,2,mx,my,80);fire.addColorStop(0,'#ffffe5');fire.addColorStop(.25,'#ffd65df0');fire.addColorStop(.6,'#f7632190');fire.addColorStop(1,'#ff450000');ctx.fillStyle=fire;ctx.fillRect(mx-80,my-80,160,160);ctx.restore()}
+if(flash>0){let mx=cx,my=top+size*.025;ctx.save();ctx.globalCompositeOperation='screen';let fire=ctx.createRadialGradient(mx,my,2,mx,my,80);fire.addColorStop(0,'#ffffe5');fire.addColorStop(.25,'#ffd65df0');fire.addColorStop(.6,'#f7632190');fire.addColorStop(1,'#ff450000');ctx.fillStyle=fire;ctx.fillRect(mx-80,my-80,160,160);ctx.restore()}
 if(mapShown)drawMap();
 }
 function drawMap(){const scale=7,ox=12,oy=12;ctx.fillStyle='#0c0808df';ctx.fillRect(8,8,176,143);for(let y=0;y<level.length;y++)for(let x=0;x<level[y].length;x++){ctx.fillStyle=solid(x,y)?'#79634c':'#211810';ctx.fillRect(ox+x*scale,oy+y*scale,scale-1,scale-1)}for(let s of seals){ctx.fillStyle=s.on?'#f47c32':'#685441';ctx.fillRect(ox+s.x*scale-2,oy+s.y*scale-2,4,4)}ctx.fillStyle=finalWave?'#bd70ef':'#675571';ctx.fillRect(ox+exit.x*scale-2,oy+exit.y*scale-2,4,4);ctx.fillStyle='#ffebad';ctx.beginPath();ctx.arc(ox+p.x*scale,oy+p.y*scale,3,0,7);ctx.fill();ctx.strokeStyle='#ffebad';ctx.beginPath();ctx.moveTo(ox+p.x*scale,oy+p.y*scale);ctx.lineTo(ox+(p.x+Math.cos(p.a))*scale,oy+(p.y+Math.sin(p.a))*scale);ctx.stroke()}
