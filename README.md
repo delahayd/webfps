@@ -9,7 +9,7 @@ An English-language infernal browser FPS. Run `python3 -m http.server 8080 --dir
 - Arrow keys: look around when mouse capture is unavailable.
 - 1 / 2: revolver / shotgun; E: break a seal; M: map; Escape: pause.
 
-Break three seals and reach the northern gate. A secret stash is hidden in the western alcove.
+Break three seals and reach the northern gate. The original western alcove stash remains. Two additional concealed passages connect the western hall and eastern crypt to the main routes. Look for a faint crack, face the wall and press E; the stone opens after a short rumble. Each passage contains ammo and health and has a second exit. The map hides these areas until discovery; the HUD counts 0–2 passages. Restarting resets their walls and rewards.
 
 ## Graphics and combat
 WebGL world geometry, locally served basalt textures and transparent demon/weapon sprites. Assets generated with imagegen. Optional Google fonts; no external service needed to play.
@@ -17,7 +17,7 @@ WebGL world geometry, locally served basalt textures and transparent demon/weapo
 Weapon sounds combine a sharp report, a low-frequency blast, mechanical sounds and room reflections. Blood particles have gravity and leave temporary floor stains. Particle and stain counts are capped.
 
 ## Voices and music
-Four English kill lines use locally generated Kokoro neural voice clips (`am_fenrir`, speed 0.94), with natural intonation and no radio filter. Browser speech synthesis has been removed, so playback is consistent across devices. The four lines retain their English subtitles and 4.5-second cooldown.
+Four English kill lines use locally generated Kokoro neural voice clips (a 75% `am_onyx` / 25% `am_fenrir` blend, speed 1.08), followed by a 2.5-semitone pitch reduction that preserves speaking tempo, gentle bass/presence EQ and compression. The lines are short and emphatic: “Back to hell!”, “Stay down, demon!”, “That’s what you get!”, “Burn in hell!”. Browser speech synthesis has been removed, so playback is consistent across devices. The four lines retain their English subtitles and 4.5-second cooldown.
 
 An original 64-second stereo dark ambient score combines low drones, slow heartbeat-like percussion, dissonant swells and distant metallic notes. The loop fades in while playing, fades out on pause/death/victory, and ducks automatically during spoken lines. MUSIC and VOICE can be toggled independently; SOUND mutes all audio.
 
@@ -26,4 +26,4 @@ The music and clips are served from `dist/assets`; no speech service or neural m
 Voice model: [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), Apache-2.0; generator: [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx), MIT. Music is an original procedural composition for this project.
 
 ## Verification
-Chrome: controls, 360° and vertical aiming, seals/victory, blood impacts and expiry, English text, four decoded neural voice clips, 64-second decoded music loop, music ducking and restoration, independent voice/music switches, rendered mixed audio, mute/pause and WebGL errors. Desktop controls only. Enemies are camera-facing detailed sprites; the environment is 3D.
+Chrome: controls, 360° and vertical aiming, seals/victory, blood impacts and expiry, English text, four decoded neural voice clips, 64-second decoded music loop, music ducking and restoration, independent voice/music switches, rendered mixed audio, mute/pause and WebGL errors, both hidden passages, facing/proximity interaction, wall collisions, alternate exits, rewards, discovery count and restart reset. Desktop controls only. Enemies are camera-facing detailed sprites; the environment is 3D.

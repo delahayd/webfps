@@ -6,3 +6,5 @@
 #quip{position:absolute;bottom:13%;left:0;width:100%;text-align:center;color:#f0d8b5;font-size:23px;letter-spacing:1px;text-shadow:0 2px 3px #000,0 0 8px #000;pointer-events:none}
 
 .audio-controls{display:flex;gap:8px}header .audio-controls button{font-size:12px;padding:8px 10px;white-space:nowrap}@media(max-width:1000px){header>span{display:none}}@media(max-width:600px){header{padding:10px;height:auto;gap:10px;flex-wrap:wrap}header a{font-size:20px}.audio-controls{gap:5px}header .audio-controls button{padding:7px 8px;font-size:11px}}
+
+#interact{position:absolute;top:58%;left:0;width:100%;text-align:center;color:#edd6b4;font:12px 'Space Mono',monospace;text-shadow:0 2px 4px #000;pointer-events:none}
