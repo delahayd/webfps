@@ -1,0 +1,11 @@
+Gunshot source recordings: Vincent Sevedge (Tabasco), copyright 2009.
+Source: https://opengameart.org/content/gunshot-sounds
+Archive: https://opengameart.org/sites/default/files/sounds.zip
+The source page lists CC0; the archive contains a CC BY 3.0 notice.
+This project credits the author and preserves the archive's attribution terms:
+https://creativecommons.org/licenses/by/3.0/
+Changes: isolated one-shots, mono conversion, noise-tail gating, bass transients,
+EQ/soft saturation and short reflections. Used for revolver, shotgun and heavy MG.
+
+Hell Forged: original 160 BPM instrumental metal composition for The Last Gate.
+Generated from the project script compose-metal.py; no Doom audio is used.

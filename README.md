@@ -1,15 +1,15 @@
-# webfps
+# WebFPS
 
-Collection de FPS jouables dans un navigateur. Chaque jeu dispose de son propre répertoire.
+Deux FPS autonomes jouables en anglais dans un navigateur de bureau compatible WebGL.
 
-- [Inferno — The Last Gate: Hell Forged](inferno/README.md) : FPS dans une forteresse infernale.
+- [Inferno — The Last Gate](inferno/README.md) : forteresse infernale.
+- [Outbreak — The Possessed Lab](outbreak/README.md) : libérer un laboratoire, du bâtiment B au bâtiment A.
 
-Pour lancer Inferno depuis la racine du dépôt :
+Depuis cette racine :
 
 ```sh
-python3 -m http.server 8080 --directory inferno/dist
+python3 -m http.server 8080
 ```
 
-Ouvrir ensuite http://localhost:8080 dans un navigateur de bureau compatible WebGL.
-
-Pour régénérer les ressources, lancer les scripts depuis le répertoire `inferno`.
+- Inferno : http://localhost:8080/inferno/dist/
+- Outbreak : http://localhost:8080/outbreak/dist/
