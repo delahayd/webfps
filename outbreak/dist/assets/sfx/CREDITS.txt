@@ -9,3 +9,9 @@ EQ/soft saturation and short reflections. Used for revolver, shotgun and heavy M
 
 Hell Forged: original 160 BPM instrumental metal composition for The Last Gate.
 Generated from the project script compose-metal.py; no Doom audio is used.
+
+Director death scream: "Female Scream 1" by AuraVoice / Nocturnal_Vanguard.
+Source: https://opengameart.org/content/female-scream-1
+Original file: https://opengameart.org/sites/default/files/female_scream_1.ogg
+License: CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+Unmodified recorded vocal performance, played as a game sound effect.

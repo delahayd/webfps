@@ -1,8 +1,8 @@
 'use strict';
 let furniture=[],furnitureRevision=0;
 function resetFurniture(){
- const desks=[[7,52],[29,52],[7,46],[30,46],[8,39.8],[29,39.8],[6,12.5],[32,12.5],[13,5.5],[30,5.5],[42,2.5]];
- const cabinets=[[5.8,50.8],[32,50.8],[5.8,43.8],[32,43.8],[5.8,36.8],[32,36.8],[4.8,9.8],[33,9.8],[14,2.5],[33,2],[44,5.5]];
+ const desks=[[7,52],[29,52],[7,46],[30,46],[8,39.8],[29,39.8],[6,12.5],[32,12.5],[30,5.5],[57,2.5]];
+ const cabinets=[[5.8,50.8],[32,50.8],[5.8,43.8],[32,43.8],[5.8,36.8],[32,36.8],[4.8,9.8],[45,12.8],[33,2],[61,5.5]];
  furniture=[...desks.map(([x,y])=>({x,y,type:'desk',w:2.2,d:1.05,h:1.55,maxHp:130,hp:130})),...cabinets.map(([x,y])=>({x,y,type:'cabinet',w:1.25,d:.65,h:2.35,maxHp:210,hp:210}))].map((f,id)=>({...f,id,z:floorAt(f.x,f.y),revision:0,damageFlash:0}));furnitureRevision++;
 }
 function furnitureBlocks(x,y,z){return furniture.some(f=>f.hp>0&&Math.abs(x-f.x)<f.w/2+.12&&Math.abs(y-f.y)<f.d/2+.12&&z>=f.z&&z<f.z+f.h)}

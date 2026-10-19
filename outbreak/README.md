@@ -1,6 +1,6 @@
 # Outbreak — The Possessed Lab
 
-A standalone English-language browser FPS inspired by the Saint-Priest research campus. Restore Building B's systems, cross the campus courtyard, override containment in Building A, and defeat the fictional possessed unit director in her northern chamber.
+A standalone English-language browser FPS set on the entirely fictional Blackthorn research campus. Restore Building B's systems, cross the campus courtyard, override containment in Building A, and defeat the fictional possessed unit director in her northern chamber.
 
 From the repository root:
 
@@ -32,15 +32,15 @@ Six 2 m wide, 3.25 m high office doors separate Computer Science, microelectroni
 
 Two concealed service passages hold the plasma rifle and BFG. Face a damaged panel at close range and press **E**. The map hides the caches until discovery. Restart resets both secrets, all doors and the arsenal.
 
-The layout is an original gameplay approximation, not a surveyed reconstruction of LIRMM. Public campus reference: [LIRMM contact and access](https://www.lirmm.fr/contact-et-acces/). Events, interiors and characters are fictional; no actual director is depicted.
+The campus, its layout, institutions, events and characters are entirely fictional.
 
 ## First floors, stairs and destructible furniture
 
-Both buildings have a playable first floor at **+4 m**, reached by physical sixteen-riser stairways with railings. Movement, camera height, enemy height, aiming, projectile collision, pickups and persistent blood/impacts follow the floor elevation. The map distinguishes stairs and elevated rooms.
+Both buildings have a playable first floor at **+4 m**, reached by physical sixteen-riser stairways without railings. Movement, camera height, enemy height, aiming, projectile collision, pickups and persistent blood/impacts follow the floor elevation. The map distinguishes stairs and elevated rooms.
 
 In Building B, the stairway starts from the western ground-floor wing. It leads to **Computer Science**, the network isolation terminal, and the hidden plasma cache. The power terminal remains on the ground floor. Both systems must be restored to leave the building.
 
-In Building A, the containment override unlocks the central stairway. Upstairs, an antechamber contains **eight guards**. Defeat all of them to open the director's office to the east, on the same first floor. The boss introduction triggers only after entering that office.
+In Building A, the containment override unlocks the central stairway. Upstairs, an antechamber contains **sixteen guards**. Defeat all of them to open the director's office to the east, on the same first floor. The boss introduction triggers only after entering that office.
 
 There are **11 desks and 11 cabinets**, built from actual 3D geometry. Desks have wood tabletops, metal legs, drawers, monitors, keyboards, mice, papers and rolling chairs. Cabinets have door panels, handles, shelves and binders. Shooting them causes visible damage: collapsed monitors, broken drawers and exposed cabinet shelves. Continued fire destroys them and leaves rubble. Intact furniture blocks movement and shots; destroyed furniture becomes traversable. All weapons, including chainsaw, rockets and energy weapons, can damage furniture. Restart restores every prop.
 
@@ -62,7 +62,7 @@ WASD/ZQSD moves; mouse aims; left click fires (hold for automatic fire); right c
 | 6 | Plasma rifle | Upstairs secret passage in Building B, rapid blue projectiles |
 | 7 | BFG 9000 | Secret passage in Building A, 0.65 s charge, large green projectile and area damage |
 
-The BFG consumes 40 energy cells per shot and shares cells with the plasma rifle. Rocket crates and cell packs supplement general ammo pickups. New weapon artwork is original Doom-inspired imagery, generated specifically for this game. New weapon sounds are synthesized locally with Web Audio; Inferno's three recorded firing sounds, music and English voices are retained. Audio attribution: `dist/assets/sfx/CREDITS.txt`.
+The BFG consumes 40 energy cells per shot and shares cells with the plasma rifle. Rocket crates and cell packs supplement general ammo pickups. New weapon artwork is original Doom-inspired imagery, generated specifically for this game. New weapon sounds are synthesized locally with Web Audio; Inferno's three recorded firing sounds and English voices are retained; gameplay music uses the supplied laboratory loop. Audio attribution: `dist/assets/sfx/CREDITS.txt`.
 
 ## Persistent combat traces and final sequences
 
@@ -108,3 +108,27 @@ Chrome checks passed for seven weapon images, 32 directional walking textures, t
 The expanded browser check is `node outbreak/tests/update-browser.cjs` with the same local test server and Chrome debugging port. It checks tension music loading and cleanup, wider office doors, persistent wall/floor traces, the boss introduction, ending captions and result, reset, and rendering errors.
 
 The current floor/furniture browser test is `node outbreak/tests/floors-browser.cjs`, using the local server on port 8097 and Chrome debugging port 9247. It checks new furniture meshes and damaged/rubble states, first-floor elevation, stair climbing, antechamber guards, in-game boss collapse, corpse rendering, ending handoff, reset and the English disclaimer. Chrome screenshots of both staircases, Computer Science, furniture damage and death phases are saved under `/tmp/outbreak-*.png`.
+
+## Extended campus and audio controls
+
+The map now spans 65 × 73 cells, with a larger southern research wing, an extended upstairs service passage and a concealed 15 × 32-cell outdoor garden holding the BFG. The director’s staircase leads through an upper landing into a continuous guard hall; a four-metre reinforced double door unlocks after all sixteen guards fall.
+
+Gameplay music loops the user-provided `assets/music/outbreak-laboratory-loop.ogg`. MUSIC and SOUND each have a volume slider (0–100%) and mute button; volume levels persist locally. SOUND controls weapon effects, voices and incidental sounds independently of the music, including cinematic music. Walking speed is 5 units/s; Shift sprints at 8 units/s. Cars have 180 HP and require several direct hits before exploding (five revolver shots, at least two impacts with any weapon). Their paint darkens with damage and hits display remaining integrity. Explosions damage nearby enemies and the player; nearby vehicles and splash explosions cannot damage or detonate a car. Restart restores the vehicles.
+
+### Access and vehicle effects corrections
+
+Building A now uses an east-facing staircase with sixteen physical risers and a clear exit into the upper hall. Administration stays at ground level behind its own doorway; the director’s entire four-cell entrance stays at +4 m. The first secret passage leads onto a playable, paved terrace with open sky and raised parapets. Voices default to OFF and can be enabled with the VOICE button. Vehicle explosions use animated turbulent fire, rising smoke, sparks and ballistic debris, plus a dedicated stereo blast with a 2.4-second rumbling tail and distance attenuation.
+
+`node outbreak/tests/campaign.cjs` checks actual movement through the administration and boss doors, up the stairs and onto the terrace. `node outbreak/tests/access-browser.cjs [game URL] [Chrome debug URL]` repeats access checks in Chrome, verifies the voice toggle, explosion waveform and WebGL rendering, and saves captures to `/tmp/outbreak-fixed-*.png`.
+
+### Enemy pursuit and terrace facade
+
+Enemy spawns are checked against walls and intact furniture. Alerted enemies can find a route around furniture; the director continues pursuit around corners and out of her office. Her speed is 2.25 m/s (3 when enraged), ranged cooldown is 0.75 s (0.4 when enraged), and she also attacks at close range. Both staircases have no railings. Exterior facades remain opaque from the secret terrace, with full-height building walls and low parapets on the open edges. The campus is named Blackthorn and has no connection to a real institution.
+
+### Administration and director death audio
+
+Administration retains its compact original footprint inside Building A; the courtyard has no office extension. The renderer uses a 240 m far plane so distant office walls remain visible through the opened antechamber doorway. The director's death triggers one recorded female scream, routed through SOUND independently of optional player quips (VOICE). Restart and completion stop the death cue and cancel deferred playback. Source and CC0 license are recorded in `dist/assets/sfx/CREDITS.txt`.
+
+The header displays THE POSSESSED LAB. Victory and defeat screens include enemy kills and secrets found as counts and percentages, calculated against the full mission totals, alongside elapsed time. Restart resets the results.
+
+Upper stairwell walls now close the height difference above adjoining ground-floor ceilings. This prevents looking over those ceilings toward the garden while leaving the stair entrance open below. `node outbreak/tests/stair-walls-browser.cjs` checks all twelve interior ceiling joins, six pixel-based occlusion probes above Building A's stairs, and both ascent and descent.

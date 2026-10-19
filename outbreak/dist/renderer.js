@@ -7,7 +7,7 @@ class HellRenderer {
     this.level=level;this.textures={};this.weapons=[];this.ready=false;
     const gl=this.gl,compile=(type,source)=>{let s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s};
     const vs=`attribute vec3 position;attribute vec2 uv;attribute vec3 color;uniform vec3 camera;uniform float yaw;uniform float pitch;uniform float aspect;varying vec2 texcoord;varying vec3 tint;varying vec3 world;varying float depth;
-    void main(){vec3 delta=position-camera;float c=cos(yaw),s=sin(yaw),cp=cos(pitch),sp=sin(pitch);vec3 right=vec3(-s,0.,c);vec3 up=vec3(-c*sp,cp,-s*sp);vec3 forward=vec3(c*cp,sp,s*cp);float z=dot(delta,forward);float tangent=.57735;gl_Position=vec4(dot(delta,right)/(aspect*tangent),dot(delta,up)/tangent,1.002*z-.08008,z);texcoord=uv;tint=color;world=position;depth=length(delta);}`;
+    void main(){vec3 delta=position-camera;float c=cos(yaw),s=sin(yaw),cp=cos(pitch),sp=sin(pitch);vec3 right=vec3(-s,0.,c);vec3 up=vec3(-c*sp,cp,-s*sp);vec3 forward=vec3(c*cp,sp,s*cp);float z=dot(delta,forward);float tangent=.57735;const float nearPlane=.04;const float farPlane=240.;gl_Position=vec4(dot(delta,right)/(aspect*tangent),dot(delta,up)/tangent,((farPlane+nearPlane)*z-2.*farPlane*nearPlane)/(farPlane-nearPlane),z);texcoord=uv;tint=color;world=position;depth=length(delta);}`;
     const fs=`precision highp float;uniform sampler2D image;uniform float sprite;uniform float clock;uniform float glow;uniform float opacity;uniform float gateCut;varying vec2 texcoord;varying vec3 tint;varying vec3 world;varying float depth;
     void main(){if(gateCut>.5&&texcoord.x>.30&&texcoord.x<.70&&texcoord.y>.03&&texcoord.y<.68)discard;vec4 sampleColor=texture2D(image,texcoord);if(sampleColor.a<.18)discard;float pulse=.93+.07*sin(clock*3.1);float l1=2.4/(1.+distance(world,vec3(13.,1.1,21.))*distance(world,vec3(13.,1.1,21.))*.5);float l2=2.4/(1.+distance(world,vec3(21.,1.1,21.))*distance(world,vec3(21.,1.1,21.))*.5);float l3=3.2/(1.+pow(distance(world,vec3(18.,3.6,4.)),2.)*.24);float l4=3.2/(1.+pow(distance(world,vec3(39.,-.5,29.)),2.)*.24);vec3 light=vec3(.52,.6,.69)+vec3(.2,.15,.34)*(l1+l2+l3+l4)*pulse+vec3(.5)/(1.+depth*.2);float outside=smoothstep(14.5,15.5,world.z)*(1.-smoothstep(33.5,34.5,world.z));light=mix(light,vec3(.95,1.,1.04),outside*.75);vec3 rgb=sampleColor.rgb*tint*light;rgb+=sampleColor.rgb*glow;float fog=1.-exp(-depth*mix(.035,.014,outside));rgb=mix(rgb,vec3(.025,.045,.075),fog);gl_FragColor=vec4(rgb,sampleColor.a*opacity);}`;
     let program=gl.createProgram();gl.attachShader(program,compile(gl.VERTEX_SHADER,vs));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));this.program=program;gl.useProgram(program);
@@ -21,15 +21,23 @@ class HellRenderer {
     const mesh=kind=>groups[kind]??(groups[kind]=[]),wall=(x,y)=>(level[y]?.[x]??'#')==='#';
     for(let y=0;y<level.length;y++)for(let x=0;x<level[y].length;x++){
       if(wall(x,y))continue;const outside=outdoor(x+.5,y+.5),ceiling=ceilingAt(x+.5,y+.5),floor=floorAt(x+.5,y+.5);
-      const ground=outside?(x>=36?'asphalt':x>=16&&x<=23?'pavement':'grass'):'floor';
-      if(stairAt(x+.5,y+.5)){for(let n=0;n<2;n++){const yy=y+n*.5,h=floorAt(x+.5,yy+.25);this.quad(mesh(ground),[[x,h,yy],[x+1,h,yy],[x+1,h,yy+.5],[x,h,yy+.5]]);const other=floorAt(x+.5,yy+.51);if(Math.abs(other-h)>.01)this.quad(mesh('stairwall'),[[x,Math.min(h,other),yy+.5],[x+1,Math.min(h,other),yy+.5],[x+1,Math.max(h,other),yy+.5],[x,Math.max(h,other),yy+.5]])}}
+      const ground=outside?(secretTerrace(x,y)?'pavement':x>=36?'asphalt':x>=16&&x<=23?'pavement':'grass'):'floor';
+      if(stairAt(x+.5,y+.5)){const east=stairAt(x+.5,y+.5)==='A';for(let n=0;n<2;n++){const xx=x+(east?n*.5:0),yy=y+(east?0:n*.5),sx=east?.5:1,sy=east?1:.5,h=floorAt(xx+sx*.5,yy+sy*.5);this.quad(mesh(ground),[[xx,h,yy],[xx+sx,h,yy],[xx+sx,h,yy+sy],[xx,h,yy+sy]]);const other=floorAt(xx+(east?.51:.5),yy+(east?.5:.51));if(Math.abs(other-h)>.01){const low=Math.min(h,other),high=Math.max(h,other);this.quad(mesh('stairwall'),east?[[xx+.5,low,yy],[xx+.5,low,yy+1],[xx+.5,high,yy+1],[xx+.5,high,yy]]:[[xx,low,yy+.5],[xx+1,low,yy+.5],[xx+1,high,yy+.5],[xx,high,yy+.5]])}}}
       else this.quad(mesh(ground),[[x,floor,y],[x+1,floor,y],[x+1,floor,y+1],[x,floor,y+1]]);
       if(!outside)this.quad(mesh('ceiling'),[[x,ceiling,y],[x,ceiling,y+1],[x+1,ceiling,y+1],[x+1,ceiling,y]]);
       for(let [dx,dy]of [[-1,0],[1,0],[0,-1],[0,1]]){
-        const nx=x+dx,ny=y+dy;if(!wall(nx,ny)){const h=floorAt(x+.5+dx*.51,y+.5+dy*.51),here=floorAt(x+.5+dx*.49,y+.5+dy*.49);if(h>here+.01){const points=dx===-1?[[x,here,y],[x,here,y+1],[x,h,y+1],[x,h,y]]:dx===1?[[x+1,here,y],[x+1,here,y+1],[x+1,h,y+1],[x+1,h,y]]:dy===-1?[[x,here,y],[x+1,here,y],[x+1,h,y],[x,h,y]]:[[x,here,y+1],[x+1,here,y+1],[x+1,h,y+1],[x,h,y+1]];this.quad(mesh('wall'),points)}continue}
+        const nx=x+dx,ny=y+dy,terraceWall=secretTerrace(x,y)&&((dy===-1&&y===61&&x>=4)||(dx===1&&x===12));if(!wall(nx,ny)&&!terraceWall){const h=floorAt(x+.5+dx*.51,y+.5+dy*.51),here=floorAt(x+.5+dx*.49,y+.5+dy*.49);if(h>here+.01){const points=dx===-1?[[x,here,y],[x,here,y+1],[x,h,y+1],[x,h,y]]:dx===1?[[x+1,here,y],[x+1,here,y+1],[x+1,h,y+1],[x+1,h,y]]:dy===-1?[[x,here,y],[x+1,here,y],[x+1,h,y],[x,h,y]]:[[x,here,y+1],[x+1,here,y+1],[x+1,h,y+1],[x,h,y+1]];this.quad(mesh('wall'),points)}
+          // Seal the upper part of the edge when the adjoining room has a lower ceiling.
+          // The opening below stays clear for walking between the room and stairwell.
+          const nextCeiling=ceilingAt(nx+.5,ny+.5),low=Math.max(floor,nextCeiling);
+          if(!outside&&!outdoor(nx+.5,ny+.5)&&low<ceiling-.01){
+            const points=dx===-1?[[x,low,y],[x,low,y+1],[x,ceiling,y+1],[x,ceiling,y]]:dx===1?[[x+1,low,y+1],[x+1,low,y],[x+1,ceiling,y],[x+1,ceiling,y+1]]:dy===-1?[[x+1,low,y],[x,low,y],[x,ceiling,y],[x+1,ceiling,y]]:[[x,low,y+1],[x+1,low,y+1],[x+1,ceiling,y+1],[x,ceiling,y+1]];
+            this.quad(mesh('wall'),points);
+          }
+          continue}
         // Open-air boundaries are low campus fences. Building fronts have real height.
-        const facade=outside&&dy!==0&&(ny===14||ny===34)&&nx>=4&&nx<=45;
-        const height=outside?(facade?3.8:1):ceiling;
+        const facade=terraceWall||(outside&&dy!==0&&(ny===14||ny===34)&&nx>=4&&nx<=45);
+        const height=outside?floor+(facade?3.8:1.1):ceiling;
         const points=dx===-1?[[x,floor,y],[x,floor,y+1],[x,height,y+1],[x,height,y]]:dx===1?[[x+1,floor,y+1],[x+1,floor,y],[x+1,height,y],[x+1,height,y+1]]:dy===-1?[[x+1,floor,y],[x,floor,y],[x,height,y],[x+1,height,y]]:[[x,floor,y+1],[x+1,floor,y+1],[x+1,height,y+1],[x,height,y+1]];
         this.quad(mesh(facade?'facade':outside?'fence':stairAt(x+.5,y+.5)?'stairwall':'wall'),points,[1,1,1],1);
       }
@@ -40,7 +48,10 @@ class HellRenderer {
     }
     // Upper floors, rooftop cornices and window bands form visible freestanding buildings.
     for(let b of [{x1:3.5,x2:46.2,z1:.5,z2:15,height:9.6,front:15.012},{x1:4.5,x2:34.5,z1:34,z2:56.5,height:11.5,front:33.988}]){
-      this.box(mesh('facade'),b.x1,3.8,b.z1,b.x2,b.height,b.z2,[1,1,1]);
+      // Close the exterior shell, leaving openings where upper walkable rooms cross it.
+      const upperPassage=(x,y,dx,dy)=>[-1,1].every(sign=>{const xx=x+dx*.55*sign,yy=y+dy*.55*sign;return !solid(xx,yy)&&floorAt(xx,yy)>3.8});
+      for(let x=b.x1;x<b.x2;x+=1)for(const y of [b.z1,b.z2])if(!upperPassage(x+.5,y,0,1))this.box(mesh('facade'),x,3.8,y-.025,Math.min(x+1,b.x2),b.height,y+.025);
+      for(let y=b.z1;y<b.z2;y+=1)for(const x of [b.x1,b.x2])if(!upperPassage(x,y+.5,1,0))this.box(mesh('facade'),x-.025,3.8,y,x+.025,b.height,Math.min(y+1,b.z2));
       this.box(mesh('roof'),b.x1-.2,b.height,b.z1-.2,b.x2+.2,b.height+.22,b.z2+.2,[.75,.8,.82]);
       for(let x=b.x1+1;x<b.x2-1;x+=2.3)for(let h of [4.4,7.3]){
         this.quad(mesh('window'),[[x,h,b.front],[x+1.5,h,b.front],[x+1.5,h+1.65,b.front],[x,h+1.65,b.front]]);
@@ -49,7 +60,6 @@ class HellRenderer {
       for(let x of [7,10,26,29])this.quad(mesh('window'),[[x,.65,b.front],[x+1.8,.65,b.front],[x+1.8,2.85,b.front],[x,2.85,b.front]]);
       this.box(mesh('roof'),15.5,3.4,b.front-.7,23.5,3.6,b.front+.7,[.5,.6,.65]);
     }
-    for(let stair of [{x1:12.1,x2:14.9,low:46.7,high:37.5},{x1:18.1,x2:20.9,low:9,high:1.5}])for(let x of [stair.x1,stair.x2]){this.cylinder(mesh('solid'),[x,floorAt(x,stair.low)+1,stair.low],[x,floorAt(x,stair.high)+1,stair.high],.035,.035,[.65,.7,.72]);for(let y=stair.high;y<stair.low;y+=1.5)this.cylinder(mesh('solid'),[x,floorAt(x,y),y],[x,floorAt(x,y)+1,y],.028,.028,[.53,.58,.6])}
     campusTrees.forEach(([x,z],i)=>this.campusTree(mesh,x,z,i));
     for(let c of campusCars)this.campusCar(mesh,c);
     for(let z=19;z<34;z+=4)this.box(mesh('solid'),36,.013,z,44,.022,z+.08,[.9,.88,.65]);
@@ -76,7 +86,7 @@ class HellRenderer {
     }
   }
   campusCar(mesh,c){
-    const x=c.x,z=c.y,color=c.color;
+    const x=c.x,z=c.y,color=c.color.map(v=>v*(.45+.55*c.hp/c.maxHp));if(c.destroyed){this.box(mesh('solid'),x-.9,.12,z-1.8,x+.9,.5,z+1.8,[.07,.065,.06]);return}
     // Bevelled body shell with rounded ends, raised bonnet and sloping glass cabin.
     const stations=[[-1.93,.78,.82],[-1.62,.98,.98],[1.42,.98,.96],[1.92,.81,.8]];
     const ring=([zz,w,h])=>[[-w*.8,.36],[-w,.5],[-w,.78],[-w*.82,h],[w*.82,h],[w,.78],[w,.5],[w*.8,.36]].map(([xx,yy])=>[x+xx,yy,z+zz]);
@@ -111,6 +121,13 @@ class HellRenderer {
     }
     const arsenal=await load('assets/weaponAtlas.png');
     for(let i=0;i<4;i++){const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');const bounds=[[0,.247],[.257,.484],[.498,.711],[.733,1]],lo=bounds[i][0],hi=bounds[i][1];g.drawImage(arsenal,lo*arsenal.width,0,(hi-lo)*arsenal.width,arsenal.height,0,0,512,512);this.weapons.push(c);this.textures['pickup'+['chainsaw','rocket','plasma','bfg'][i]]=this.texture(c)}
+    // Layered procedural fire, soot, sparks and flying bodywork for vehicle blasts.
+    for(const kind of ['carfire','carsmoke','carspark','cardebris']){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
+      if(kind==='cardebris'){g.fillStyle='#232b30';g.beginPath();g.moveTo(22,18);g.lineTo(107,36);g.lineTo(91,102);g.lineTo(35,110);g.closePath();g.fill();g.strokeStyle='#6b6c64';g.lineWidth=5;g.stroke()}
+      else if(kind==='carspark'){const glow=g.createRadialGradient(64,64,0,64,64,62);glow.addColorStop(0,'#fffbe9');glow.addColorStop(.15,'#ffdc73');glow.addColorStop(.4,'#f7752490');glow.addColorStop(1,'#e83b0000');g.fillStyle=glow;g.fillRect(0,0,128,128)}
+      else if(kind==='carfire'){const pixels=g.createImageData(128,128),hash=(x,y)=>{const v=Math.sin(x*127.1+y*311.7)*43758.5453;return v-Math.floor(v)},noise=(x,y)=>{const ix=Math.floor(x),iy=Math.floor(y),u=x-ix,v=y-iy,a=u*u*(3-2*u),b=v*v*(3-2*v);return (hash(ix,iy)*(1-a)+hash(ix+1,iy)*a)*(1-b)+(hash(ix,iy+1)*(1-a)+hash(ix+1,iy+1)*a)*b};for(let y=0;y<128;y++)for(let x=0;x<128;x++){const n=noise(x/19,y/19)*.55+noise(x/8,y/8)*.3+noise(x/3,y/3)*.15,r=Math.hypot((x-64)/58,(y-64)/58)+(n-.5)*.65,core=Math.max(0,1-r),j=(y*128+x)*4;pixels.data[j]=230+25*core;pixels.data[j+1]=55+180*core*core;pixels.data[j+2]=10+135*core**4;pixels.data[j+3]=255*Math.max(0,Math.min(1,(1-r)*2.8))*(.55+n*.45)}g.putImageData(pixels,0,0)}
+      else for(let i=0;i<16;i++){const a=i*2.399,rad=12+(i%5)*5,x=64+Math.cos(a)*(i%4)*10,y=64+Math.sin(a)*(i%4)*10,glow=g.createRadialGradient(x,y,0,x,y,rad);if(kind==='carfire'){glow.addColorStop(0,'#fff3c9e0');glow.addColorStop(.25,'#ffc04ed0');glow.addColorStop(.6,'#e95318a0');glow.addColorStop(1,'#77250000')}else{glow.addColorStop(0,'#343332b0');glow.addColorStop(.5,'#4a46438a');glow.addColorStop(1,'#302e2d00')}g.fillStyle=glow;g.fillRect(x-rad,y-rad,rad*2,rad*2)}this.textures[kind]=this.texture(c);
+    }
     const materials={stairwall:'#b5c2c9',floor:'#9aa6ad',ceiling:'#d6e0e3',grass:'#356e39',pavement:'#adb4b5',asphalt:'#353f4b',facade:'#c4c5bc',roof:'#859096',wall:'#c1c9cb',fence:'#6b7972',window:'#355a75',carGlass:'#233c50',bark:'#78624b',foliage:'#426f2d',solid:'#ffffff'};
     for(let [kind,color]of Object.entries(materials)){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.fillStyle=color;g.fillRect(0,0,256,256);
       if(kind==='grass'||kind==='asphalt'){for(let i=0;i<3000;i++){g.fillStyle=i%2?'#ffffff13':'#00000018';g.fillRect((i*83)%256,(i*47+Math.floor(i/256)*31)%256,kind==='grass'?2:1,kind==='grass'?7:1)}}
@@ -160,12 +177,12 @@ class HellRenderer {
     f.mesh=out;f.meshRevision=f.revision;return out;
   }
   drawFurniture(){const gl=this.gl;this.bind(this.dynamicBuffer);gl.bindTexture(gl.TEXTURE_2D,this.textures.solid);for(let f of furniture){const mesh=this.furnitureMesh(f);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(mesh),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,mesh.length/8)}}
-  drawDoors(){const gl=this.gl;this.bind(this.dynamicBuffer);gl.bindTexture(gl.TEXTURE_2D,this.textures.door);for(let d of officeDoors){if(d.progress>=1)continue;const mesh=[],shift=d.progress*d.width,z=floorAt(d.x,d.y+.5);if(d.axis==='x')this.box(mesh,d.x+.42,z,d.y+shift,d.x+.58,z+3.25,d.y+d.width+shift);else this.box(mesh,d.x+shift,z,d.y+.42,d.x+d.width+shift,z+3.25,d.y+.58);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(mesh),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,mesh.length/8)} }
+  drawDoors(){const gl=this.gl;this.bind(this.dynamicBuffer);gl.bindTexture(gl.TEXTURE_2D,this.textures.door);for(let d of officeDoors){if(d.progress>=1)continue;const mesh=[],shift=d.progress*d.width,z=floorAt(d.x,d.y+.5);if(d.axis==='x')this.box(mesh,d.x+.42,z,d.y+shift,d.x+.58,z+3.25,d.y+d.width+shift);else this.box(mesh,d.x+shift,z,d.y+.42,d.x+d.width+shift,z+3.25,d.y+.58);if(d.boss){this.box(mesh,d.x+.32,z,d.y+shift,d.x+.68,z+3.65,d.y+d.width+shift,[.22,.12,.32]);for(let yy of [.12,d.width/2,d.width-.12])this.box(mesh,d.x+.29,z+.1,d.y+yy+shift,d.x+.71,z+3.55,d.y+yy+.09+shift,[.85,.65,.28]);for(let h of [.18,3.45])this.box(mesh,d.x+.28,z+h,d.y+shift,d.x+.72,z+h+.12,d.y+d.width+shift,[.85,.65,.28])}gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(mesh),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,mesh.length/8)} }
   draw(player,objects,clock){if(!this.ready)return;let gl=this.gl;gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);this.drawSky(player);gl.useProgram(this.program);gl.uniform3f(this.uniforms.camera,player.x,(player.eyeZ??player.z??0)+1.05,player.y);gl.uniform1f(this.uniforms.yaw,player.a);gl.uniform1f(this.uniforms.pitch,player.pitch);gl.uniform1f(this.uniforms.aspect,this.canvas.width/this.canvas.height);gl.uniform1f(this.uniforms.clock,clock);gl.uniform1i(this.uniforms.image,0);gl.uniform1f(this.uniforms.glow,0);gl.uniform1f(this.uniforms.opacity,1);gl.uniform1f(this.uniforms.gateCut,0);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,this.stone);gl.disable(gl.BLEND);gl.depthMask(true);for(let b of this.staticBatches){gl.bindTexture(gl.TEXTURE_2D,this.textures[b.kind]);this.bind(b.buffer);gl.drawArrays(gl.TRIANGLES,0,b.count)}this.drawDoors();this.drawFurniture();
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);this.bind(this.dynamicBuffer);const rx=-Math.sin(player.a),rz=Math.cos(player.a);
     objects.sort((a,b)=>Math.hypot(b.x-player.x,b.y-player.y)-Math.hypot(a.x-player.x,a.y-player.y));
     for(let o of objects){let h=o.height??1.5,w=o.width??h*(o.kind==='portal'?.8:1),base=o.base??0;if(o.kind==='fire'){h=w=.32}if(o.kind==='portal'&&o.progress>.001){const voidMesh=[],left=-w*.2,right=w*.2,low=base+h*.03,high=base+h*.68;this.quad(voidMesh,[[o.x+rx*left,low,o.y+rz*left],[o.x+rx*right,low,o.y+rz*right],[o.x+rx*right,high,o.y+rz*right],[o.x+rx*left,high,o.y+rz*left]]);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(voidMesh),gl.DYNAMIC_DRAW);gl.bindTexture(gl.TEXTURE_2D,this.textures.gateVoid);gl.uniform1f(this.uniforms.gateCut,0);gl.uniform1f(this.uniforms.opacity,1);gl.uniform1f(this.uniforms.glow,.6);gl.drawArrays(gl.TRIANGLES,0,6)}let mesh=[];if(o.decal){const r=w/2;if(o.nz){this.quad(mesh,[[o.x-r,o.z,o.y-r],[o.x+r,o.z,o.y-r],[o.x+r,o.z,o.y+r],[o.x-r,o.z,o.y+r]])}else if(o.nx){this.quad(mesh,[[o.x,o.z-r,o.y-r],[o.x,o.z-r,o.y+r],[o.x,o.z+r,o.y+r],[o.x,o.z+r,o.y-r]])}else{this.quad(mesh,[[o.x-r,o.z-r,o.y],[o.x+r,o.z-r,o.y],[o.x+r,o.z+r,o.y],[o.x-r,o.z+r,o.y]])}}else if(o.wallDecal){w=.45;this.quad(mesh,[[o.x,base,o.y-w/2],[o.x,base,o.y+w/2],[o.x,base+h,o.y+w/2],[o.x,base+h,o.y-w/2]])}else if(o.ground){w=o.size;const depth=o.depth??w;this.quad(mesh,[[o.x-w/2,base,o.y-depth/2],[o.x+w/2,base,o.y-depth/2],[o.x+w/2,base,o.y+depth/2],[o.x-w/2,base,o.y+depth/2]])}else this.quad(mesh,[[o.x-rx*w/2,base,o.y-rz*w/2],[o.x+rx*w/2,base,o.y+rz*w/2],[o.x+rx*w/2,base+h,o.y+rz*w/2],[o.x-rx*w/2,base+h,o.y-rz*w/2]],o.hit>0?[1.9,.5,.4]:[1,1,1]);if(o.rotation){const center=base+h*.5;for(let i=0;i<mesh.length;i+=8){const horizontal=(mesh[i]-o.x)*rx+(mesh[i+2]-o.y)*rz,vertical=mesh[i+1]-center,hh=horizontal*Math.cos(o.rotation)-vertical*Math.sin(o.rotation),vv=horizontal*Math.sin(o.rotation)+vertical*Math.cos(o.rotation);mesh[i]=o.x+rx*hh;mesh[i+2]=o.y+rz*hh;mesh[i+1]=center+vv}}
-      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(mesh),gl.DYNAMIC_DRAW);gl.bindTexture(gl.TEXTURE_2D,this.textures[o.kind]);gl.uniform1f(this.uniforms.opacity,o.opacity??1);gl.uniform1f(this.uniforms.glow,['fire','plasma','bfg','blast'].includes(o.kind)?.9:o.kind==='seal'?(o.active?.9:0):o.kind==='portal'?(o.active?.55:0):o.kind==='heavy'?.12:0);gl.uniform1f(this.uniforms.gateCut,o.kind==='portal'&&o.progress>.001?1:0);gl.drawArrays(gl.TRIANGLES,0,6);
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(mesh),gl.DYNAMIC_DRAW);gl.bindTexture(gl.TEXTURE_2D,this.textures[o.kind]);gl.uniform1f(this.uniforms.opacity,o.opacity??1);gl.uniform1f(this.uniforms.glow,['fire','plasma','bfg','blast','carfire','carspark'].includes(o.kind)?.9:o.kind==='seal'?(o.active?.9:0):o.kind==='portal'?(o.active?.55:0):o.kind==='heavy'?.12:0);gl.uniform1f(this.uniforms.gateCut,o.kind==='portal'&&o.progress>.001?1:0);gl.drawArrays(gl.TRIANGLES,0,6);
       if(o.kind==='portal'&&o.progress>.001){
         gl.uniform1f(this.uniforms.gateCut,0);
         for(let side of [-1,1]){
