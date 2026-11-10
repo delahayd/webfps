@@ -37,10 +37,24 @@ jobs:
         run: node outbreak/tests/campaign.cjs
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+      - name: Prepare site
+        run: |
+          mkdir -p _site/outbreak
+          cp -a outbreak/dist/. _site/outbreak/
+          touch _site/.nojekyll
+          cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="fr">
+          <meta charset="utf-8">
+          <meta http-equiv="refresh" content="0;url=outbreak/">
+          <title>Outbreak</title>
+          <a href="outbreak/">Jouer à Outbreak</a>
+          </html>
+          HTML
       - name: Upload Outbreak
         uses: actions/upload-pages-artifact@v4
         with:
-          path: outbreak/dist
+          path: _site
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

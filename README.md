@@ -17,7 +17,7 @@ python3 -m http.server 8080
 ## Outbreak sur GitHub Pages
 
 Le workflow [Deploy Outbreak to GitHub Pages](.github/workflows/pages.yml) publie
-uniquement `outbreak/dist`, directement à la racine du site Pages. Il vérifie la
+uniquement `outbreak/dist`, dans le sous-dossier `outbreak/` du site Pages. Il vérifie la
 campagne avant publication et se relance lors des modifications du jeu sur `main`.
 
 Activation initiale : dans les paramètres du dépôt, **Settings → Pages → Build
@@ -26,12 +26,14 @@ depuis **Actions → Deploy Outbreak to GitHub Pages → Run workflow** si néce
 Un dépôt privé nécessite un abonnement GitHub compatible avec Pages.
 
 Adresse attendue après le premier déploiement réussi (sans domaine personnalisé) :
-https://delahayd.github.io/webfps/
+https://delahayd.github.io/webfps/outbreak/
+
+La racine du site redirige vers `outbreak/` pour conserver les anciens liens.
 
 Pour ajouter un lien depuis une page personnelle :
 
 ```html
-<a href="https://delahayd.github.io/webfps/">Jouer à Outbreak</a>
+<a href="https://delahayd.github.io/webfps/outbreak/">Jouer à Outbreak</a>
 ```
 
 Le jeu nécessite un navigateur de bureau compatible WebGL.
